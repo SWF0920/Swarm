@@ -1,0 +1,130 @@
+% ---------------------------------------------------------------------------
+% Figure 2 -- The four deferral policies (standalone TikZ source)
+%   pdflatex fig_policies.tex   ->   fig_policies.pdf
+%   Colors: colF (Frontier F), colW (Workers W), colH (Human Overseer H)
+% ---------------------------------------------------------------------------
+\documentclass[11pt,border=0.6pt]{standalone}
+\input{fig_icons}
+
+\tikzset{
+  badge/.style={rounded corners=2.4pt,inner xsep=3.4pt,inner ysep=2.4pt,text=white,
+                font=\sffamily\bfseries\fontsize{7.4}{8.4}\selectfont,anchor=base west},
+  small/.style={font=\sffamily\fs},
+  smallmute/.style={font=\sffamily\fs,text=mute},
+  wlabelW/.style={anchor=base,font=\sffamily\fs,text=colW},
+  wlabelF/.style={anchor=base,font=\sffamily\fs,text=colF},
+  wlabelH/.style={anchor=base,font=\sffamily\fs,text=colH},
+}
+\newcommand{\phead}[5]{%
+  \node[badge,fill=#4] (b) at (#1,#2) {#3};
+  \node[anchor=base west,text=#4!88!black,font=\sffamily\ft] at ($(b.base east)+(0.13,0)$) {#5};}
+\newcommand{\vdotsat}[3]{\foreach \d in {-0.11,0,0.11}{\fill[#3] (#1,#2+\d) circle (0.03);}}
+\newcommand{\hdotsat}[3]{\foreach \d in {-0.11,0,0.11}{\fill[#3] (#1+\d,#2) circle (0.03);}}
+
+\newcommand{\yFa}{4.02}\newcommand{\yWa}{3.18}\newcommand{\yWb}{2.40}\newcommand{\yWn}{1.30}
+\newcommand{\agentcol}{%
+  \robot{1.02}{\yFa}{0.72}{colF}
+  \node[wlabelF] at (0.33,\yFa-0.07) {$F$};
+  \foreach \y/\l in {\yWa/1,\yWb/2,\yWn/N}{%
+    \robot{1.02}{\y}{0.56}{colW}
+    \node[wlabelW] at (0.33,\y-0.07) {$W_{\l}$};}
+  \vdotsat{1.02}{1.87}{colW!70}}
+\newcommand{\slider}[2]{%
+  \draw[slate!28,line width=2.4pt,line cap=round] (1.92,#1)--(2.38,#1);
+  \draw[colW,line width=2.4pt,line cap=round] (1.92,#1)--(1.92+0.46*#2,#1);
+  \path[fill=white,draw=colW,line width=1.1pt] (1.92+0.46*#2,#1) circle (0.085);}
+
+\newcommand{\triagebase}{%
+  \robot{1.46}{1.52}{0.66}{colF}
+  \node[wlabelF] at (0.92,1.45) {$F$};
+  \draw[disp] (1.46,1.28)--(1.46,1.16);
+  \draw[disp] (0.62,1.05)--(0.62,1.16)--(2.34,1.16)--(2.34,1.05);
+  \draw[disp] (1.30,1.16)--(1.30,1.05);
+  \foreach \x/\l in {0.62/1,1.30/2,2.34/N}{%
+    \robot{\x}{0.72}{0.50}{colW}
+    \node[wlabelW] at (\x,0.16) {$W_{\l}$};}
+  \hdotsat{1.82}{0.70}{colW!70}
+  \draw[flow,colF] (1.86,1.52)--(3.10,1.52);
+  \path[card,draw=slate!55] (3.10,1.12) rectangle (3.94,1.92);
+  \envelope{3.52}{1.52}{0.54}{colF}
+  \draw[hop,colH] (3.94,1.48)--(4.20,1.48);
+  \person{4.50}{1.56}{0.66}{colH}
+  \node[wlabelH] at (4.50,1.01) {$H$};}
+
+\begin{document}
+\begin{tikzpicture}[oversightfig]
+\useasboundingbox (0,0) rectangle (16.5,5.25);
+
+% LEFT -- Policy 1: Direct-Ask
+\begin{scope}[shift={(0,0)}]
+  \path[panel,fill=colW!4,draw=colW!38] (0,0) rectangle (4.30,5.25);
+  \phead{0.16}{4.85}{Policy 1}{colW}{Direct-Ask}
+  \agentcol
+  \draw[flow,colF] (1.50,\yFa)--(2.38,\yFa);
+  \foreach \y in {\yWa,\yWb,\yWn}{\draw[flow,colW] (1.44,\y)--(2.38,\y);}
+  \path[card,draw=slate!55] (2.38,0.82) rectangle (3.30,4.50);
+  \envelope{2.84}{\yFa}{0.56}{colF}
+  \foreach \y in {3.37,2.99,2.61,2.23}{\foreach \x in {2.63,3.05}{\envelope{\x}{\y}{0.37}{colW}}}
+  \vdotsat{2.84}{1.80}{colW!70}
+  \foreach \x in {2.63,3.05}{\envelope{\x}{\yWn}{0.37}{colW}}
+  \draw[hop,colH] (3.30,2.62)--(3.56,2.62);
+  \person{3.88}{2.70}{0.74}{colH}
+  \node[wlabelH] at (3.88,2.10) {$H$};
+\end{scope}
+
+% MIDDLE, UPPER -- Policy 2a
+\begin{scope}[shift={(4.45,2.70)}]
+  \path[panel,fill=warn!4,draw=warn!36] (0,0) rectangle (7.20,2.55);
+  \phead{0.16}{2.15}{Policy 2a}{warn}{Orchestrator-Triage}
+  \triagebase
+  \envelope{3.00}{0.72}{0.42}{colW!45}
+  \draw[warn,line width=1.2pt,line cap=round] (2.82,0.54)--(3.18,0.90);
+  \draw[unrev] (3.36,0.72)--(5.36,0.72);
+  \node[anchor=base,smallmute] at (4.36,0.36) {unreviewed};
+  \warntri{5.68}{0.74}{0.50}{warn}
+  \node[anchor=base west,text=warn,font=\sffamily\fs\bfseries] at (6.04,0.80) {harm};
+  \node[anchor=base west,text=warn,font=\sffamily\fs\bfseries] at (6.04,0.52) {absorbed};
+\end{scope}
+
+% MIDDLE, LOWER -- Policy 2b (Frontier filter)
+\begin{scope}[shift={(4.45,0)}]
+  \path[panel,fill=colF!5,draw=colF!38] (0,0) rectangle (7.20,2.55);
+  \phead{0.16}{2.15}{Policy 2b}{colF}{Orchestrator-Triage}
+  \triagebase
+  \draw[flow,colW] (2.62,0.72)--(2.98,0.72);
+  \path[card,draw=colF!75] (2.98,0.42) rectangle (3.80,1.00);
+  \robotplain{3.23}{0.68}{0.30}{colF}
+  \funnel{3.56}{0.71}{0.27}{colF}
+  \node[anchor=base,text=colF,font=\sffamily\fs\bfseries] at (3.39,0.14) {Orchestrator filter};
+  \draw[colF,line width=1pt] (3.80,0.71)--(4.40,0.71);
+  \draw[flow,colF,line width=1pt] (4.40,0.71)--(5.12,0.95);
+  \draw[unrev,line width=1pt] (4.40,0.71)--(5.12,0.47);
+  \shield{5.40}{0.98}{0.34}{accent}
+  \node[anchor=base west,small] at (5.66,0.90) {detected};
+  \warntri{5.40}{0.44}{0.34}{warn}
+  \node[anchor=base west,small] at (5.66,0.36) {undetected};
+\end{scope}
+
+% RIGHT -- Policy 3: Learned IPG
+\begin{scope}[shift={(11.80,0)}]
+  \path[panel,fill=learnc!4,draw=learnc!32] (0,0) rectangle (4.70,5.25);
+  \phead{0.16}{4.85}{Policy 3}{learnc}{Learned IPG}
+  \agentcol
+  \draw[flow,colF] (1.50,\yFa)--(3.12,\yFa);
+  \foreach \y in {\yWa,\yWb,\yWn}{\bookpath{1.60}{\y+0.02}{0.32}}
+  \slider{\yWa}{0.92}\slider{\yWb}{0.08}\slider{\yWn}{0.08}
+  \draw[flow,colW] (2.54,\yWa)--(3.12,\yWa);
+  \node[anchor=base west,smallmute] at (2.50,\yWb-0.06) {silent};
+  \node[anchor=base west,smallmute] at (2.50,\yWn-0.06) {silent};
+  \path[card,draw=slate!55] (3.12,0.82) rectangle (3.90,4.50);
+  \envelope{3.51}{\yFa}{0.54}{colF}
+  \envelope{3.51}{\yWa}{0.40}{colW}
+  \draw[hop,colH] (3.90,2.62)--(4.10,2.62);
+  \person{4.38}{2.70}{0.64}{colH}
+  \node[wlabelH] at (4.38,2.16) {$H$};
+  \bookpath{4.38}{3.24}{0.32}
+  \draw[fbk] (4.38,2.04)--(4.38,0.42)--(1.60,0.42)--(1.60,1.08);
+  \node[anchor=base,fill=learnc!4,inner xsep=2.5pt,inner ysep=1.2pt,text=learnc,font=\sffamily\fs] at (3.00,0.345) {team reward};
+\end{scope}
+\end{tikzpicture}
+\end{document}

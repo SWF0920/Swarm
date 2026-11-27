@@ -1,0 +1,80 @@
+% ---------------------------------------------------------------------------
+% Figure 6 -- Two adjacent heatmaps: expected harm and team loss
+%   pdflatex fig_specialization.tex   ->   fig_specialization.pdf
+% ---------------------------------------------------------------------------
+\documentclass[11pt,border=0.6pt]{standalone}
+\input{fig_icons}
+
+\definecolor{hm0}{RGB}{44,98,168}
+\definecolor{hm1}{RGB}{122,188,212}
+\definecolor{hm2}{RGB}{250,244,188}
+\definecolor{hm3}{RGB}{248,168,78}
+\definecolor{hm4}{RGB}{198,72,14}
+\newcommand{\vmin}{1}
+\newcommand{\vmax}{25}
+
+\newcommand{\cw}{1.47}
+\newcommand{\chh}{0.98}
+\newcommand{\gy}{1.08}
+\newcommand{\xHarm}{1.30}
+\newcommand{\xLoss}{9.15}
+
+\newcommand{\setscale}[1]{%
+  \pgfmathsetmacro\tval{min(max(#1,0),1)}%
+  \pgfmathtruncatemacro\seg{min(floor(\tval*4),3)}%
+  \pgfmathtruncatemacro\segb{\seg+1}%
+  \pgfmathsetmacro\mix{(\tval*4-\seg)*100}}
+\newcommand{\logpos}[1]{ln(#1/\vmin)/ln(\vmax/\vmin)}
+\newcommand{\cell}[6]{%
+  \pgfmathsetmacro\cx{#1+#2*\cw}%
+  \pgfmathsetmacro\cy{\gy+(3-#3)*\chh}%
+  \setscale{\logpos{#4}}%
+  \pgfmathtruncatemacro\dark{ifthenelse(\tval<0.085,1,ifthenelse(\tval>0.93,1,0))}%
+  \pgfmathtruncatemacro\isbest{ifthenelse(abs(#4-#5)<0.005,1,0)}%
+  \fill[hm\segb!\mix!hm\seg] (\cx+0.02,\cy+0.02) rectangle (\cx+\cw-0.02,\cy+\chh-0.02);
+  \ifnum\dark=1 \def\tc{white}\else \def\tc{ink}\fi
+  \ifnum\isbest=1
+    \node[anchor=mid,text=\tc,font=\sffamily\bfseries\fontsize{7.8}{9}\selectfont] at (\cx+0.5*\cw,\cy+0.5*\chh-0.01) {#6};
+  \else
+    \node[anchor=mid,text=\tc,font=\sffamily\fontsize{7.8}{9}\selectfont] at (\cx+0.5*\cw,\cy+0.5*\chh-0.01) {#6};
+  \fi}
+\newcommand{\policyheads}[1]{%
+  \foreach \c/\a/\b/\subc in {0/Policy 1/Direct-Ask/colW,1/Policy 2a/Triage/colF,2/Symmetric/optimum/mute,3/Policy 3/exact IPG/colH,4/Policy 3/sampled IPG/colH}{%
+    \node[anchor=base,font=\sffamily\fontsize{7.4}{9}\selectfont\bfseries] at (#1+\c*\cw+0.5*\cw,5.40) {\a};
+    \node[anchor=base,text=\subc,font=\sffamily\fs] at (#1+\c*\cw+0.5*\cw,5.12) {\b};}}
+
+\begin{document}
+\begin{tikzpicture}[oversightfig]
+\useasboundingbox (0,0) rectangle (16.5,6.05);
+
+\node[anchor=base,font=\sffamily\ft] at (\xHarm+2.5*\cw,5.78) {Expected harm};
+\node[anchor=base,font=\sffamily\ft] at (\xLoss+2.5*\cw,5.78) {Team loss};
+\policyheads{\xHarm}
+\policyheads{\xLoss}
+
+\foreach \r/\n in {0/5,1/10,2/20,3/40}{%
+  \node[anchor=mid east,font=\sffamily\fc] at (1.16,\gy+3.5*\chh-\r*\chh) {$N=\n$};}
+\node[anchor=base east,text=colW,font=\sffamily\fs] at (1.16,5.12) {workers};
+
+\cell{\xHarm}{0}{0}{2.05}{1.13}{2.05}  \cell{\xHarm}{1}{0}{2.13}{1.13}{2.13}  \cell{\xHarm}{2}{0}{1.13}{1.13}{1.13}  \cell{\xHarm}{3}{0}{1.14}{1.13}{1.14}  \cell{\xHarm}{4}{0}{1.17}{1.13}{1.17}
+\cell{\xHarm}{0}{1}{3.62}{2.72}{3.62}  \cell{\xHarm}{1}{1}{3.63}{2.72}{3.63}  \cell{\xHarm}{2}{1}{2.72}{2.72}{2.72}  \cell{\xHarm}{3}{1}{2.72}{2.72}{2.72}  \cell{\xHarm}{4}{1}{2.75}{2.72}{2.75}
+\cell{\xHarm}{0}{2}{10.50}{5.76}{10.50}\cell{\xHarm}{1}{2}{6.63}{5.76}{6.63}  \cell{\xHarm}{2}{2}{5.76}{5.76}{5.76}  \cell{\xHarm}{3}{2}{5.76}{5.76}{5.76}  \cell{\xHarm}{4}{2}{5.77}{5.76}{5.77}
+\cell{\xHarm}{0}{3}{24.46}{11.62}{24.46}\cell{\xHarm}{1}{3}{12.63}{11.62}{12.63}\cell{\xHarm}{2}{3}{11.78}{11.62}{11.78}\cell{\xHarm}{3}{3}{11.77}{11.62}{11.77}\cell{\xHarm}{4}{3}{11.62}{11.62}{11.62\rlap{$^\dagger$}}
+
+\cell{\xLoss}{0}{0}{3.44}{2.03}{3.44}  \cell{\xLoss}{1}{0}{2.26}{2.03}{2.26}  \cell{\xLoss}{3}{0}{2.04}{2.03}{2.04}  \cell{\xLoss}{2}{0}{2.04}{2.03}{2.04}  \cell{\xLoss}{4}{0}{2.03}{2.03}{2.03}
+\cell{\xLoss}{0}{1}{7.00}{3.55}{7.00}  \cell{\xLoss}{1}{1}{3.76}{3.55}{3.76}  \cell{\xLoss}{2}{1}{3.56}{3.55}{3.56}  \cell{\xLoss}{3}{1}{3.56}{3.55}{3.56}  \cell{\xLoss}{4}{1}{3.55}{3.55}{3.55}
+\cell{\xLoss}{0}{2}{15.71}{6.57}{15.71}\cell{\xLoss}{1}{2}{6.76}{6.57}{6.76}  \cell{\xLoss}{2}{2}{6.57}{6.57}{6.57}  \cell{\xLoss}{3}{2}{6.57}{6.57}{6.57}  \cell{\xLoss}{4}{2}{6.57}{6.57}{6.57}
+\cell{\xLoss}{0}{3}{24.49}{12.54}{24.49}\cell{\xLoss}{1}{3}{12.76}{12.54}{12.76}\cell{\xLoss}{2}{3}{12.57}{12.54}{12.57}\cell{\xLoss}{3}{3}{12.57}{12.54}{12.57}\cell{\xLoss}{4}{3}{12.54}{12.54}{12.54\rlap{$^\dagger$}}
+
+\foreach \i in {0,...,79}{%
+  \setscale{(\i+0.5)/80}%
+  \fill[hm\segb!\mix!hm\seg] (4.60+\i*0.075,0.50) rectangle (4.60+\i*0.075+0.078,0.70);}
+\foreach \v in {1,2,5,10,25}{%
+  \pgfmathsetmacro\tx{4.60+6.00*\logpos{\v}}%
+  \draw[linec,line width=0.4pt] (\tx,0.50)--(\tx,0.42);
+  \node[anchor=base,text=mute,font=\sffamily\fs] at (\tx,0.14) {\v};}
+\node[anchor=base east,text=mute,font=\sffamily\fs] at (4.44,0.52) {harm or team loss (log scale)};
+\node[anchor=base west,text=ink,font=\sffamily\fs\bfseries] at (11.40,0.52) {bold};
+\node[anchor=base west,text=mute,font=\sffamily\fs] at (12.08,0.52) {lowest at that $N$};
+\end{tikzpicture}
+\end{document}

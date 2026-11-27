@@ -1,0 +1,150 @@
+% ---------------------------------------------------------------------------
+% Shared preamble for the proposal's schematic figures:
+%   fig_architecture.tex   (Figure 1, pipeline)
+%   fig_policies.tex       (Figure 2, the four deferral policies)
+%   fig_specialization.tex (Figure 6, expected harm and team loss heatmaps)
+% Uses the unified three-role semantic palette:
+%   colW (Cobalt Blue)        -- Workers (W)
+%   colF (Royal Crimson-Plum) -- Frontier Orchestrator (F)
+%   colH (Forest Emerald-Teal)-- Human Overseer (H)
+% ---------------------------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\DeclareFontFamily{OML}{lmm}{\skewchar\font127 }
+\DeclareFontShape{OML}{lmm}{m}{it}{<-> lmmi10}{}
+\DeclareFontShape{OML}{lmm}{b}{it}{<-> lmmib10}{}
+\DeclareFontFamily{OMS}{lmsy}{\skewchar\font48 }
+\DeclareFontShape{OMS}{lmsy}{m}{n}{<-> lmsy10}{}
+\DeclareFontShape{OMS}{lmsy}{b}{n}{<-> lmbsy10}{}
+\DeclareFontFamily{OT1}{lmr}{\hyphenchar\font45 }
+\DeclareFontShape{OT1}{lmr}{m}{n}{<-> rm-lmr10}{}
+\DeclareFontShape{OT1}{lmr}{bx}{n}{<-> rm-lmbx10}{}
+\DeclareFontShape{OT1}{lmr}{m}{it}{<-> rm-lmri10}{}
+\usepackage[scaled=0.90]{helvet}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,calc}
+
+% ---- three-role semantic palette + neutral/outcome accents ------------------
+\definecolor{colW}{RGB}{25,100,186}     % Workers (W): Cobalt Blue
+\definecolor{colF}{RGB}{157,23,77}      % Frontier Orchestrator (F): Royal Crimson-Plum
+\definecolor{colH}{RGB}{15,118,94}      % Human Overseer (H): Forest Emerald-Teal
+\definecolor{primary}{RGB}{157,23,77}   % alias for Frontier tier (F)
+\definecolor{worker}{RGB}{25,100,186}   % alias for Worker tier (W)
+\definecolor{human}{RGB}{15,118,94}     % alias for Human Overseer (H)
+\definecolor{accent}{RGB}{22,138,69}    % safe / harm-detected shield
+\definecolor{gatec}{RGB}{71,85,105}     % neutral admission-gate frame
+\definecolor{warn}{RGB}{204,82,14}      % unreviewed / risky execution
+\definecolor{ink}{RGB}{30,41,59}        % body text
+\definecolor{slate}{RGB}{45,55,72}      % neutral stage headers
+\definecolor{mute}{RGB}{86,100,122}     % secondary text
+\definecolor{linec}{RGB}{148,163,184}   % hairlines
+\definecolor{lockc}{RGB}{226,152,14}    % padlock: frozen base policy
+\definecolor{learnc}{RGB}{79,70,205}    % book + reward signal: learned by IPG
+
+% ---- type scale -------------------------------------------------------------
+\newcommand{\fb}{\fontsize{7.8}{9.4}\selectfont}
+\newcommand{\fs}{\fontsize{6.9}{8.3}\selectfont}
+\newcommand{\ft}{\fontsize{8.4}{10}\selectfont\bfseries}
+\newcommand{\fc}{\fontsize{8.0}{9.6}\selectfont\bfseries}
+\newcommand{\act}[1]{{\ttfamily #1}}
+
+% ---- icons (pure paths; args: x, y, scale[, colour]) -------------------------
+\newcommand{\lockpath}[3]{%
+  \begin{scope}[shift={(#1,#2)},scale=#3]
+    \draw[white,line width=#3*6.6pt,line cap=round] (-0.23,0.02)--(-0.23,0.20) arc[start angle=180,end angle=0,radius=0.23]--(0.23,0.02);
+    \fill[white,rounded corners=#3*2.6pt] (-0.50,-0.58) rectangle (0.50,0.14);
+    \draw[lockc,line width=#3*3.4pt,line cap=round] (-0.23,0.02)--(-0.23,0.20) arc[start angle=180,end angle=0,radius=0.23]--(0.23,0.02);
+    \fill[lockc,rounded corners=#3*1.6pt] (-0.41,-0.50) rectangle (0.41,0.06);
+    \fill[white] (0,-0.17) circle (0.085);
+    \fill[white] (-0.035,-0.36) rectangle (0.035,-0.17);
+  \end{scope}}
+\newcommand{\robotplain}[4]{%
+  \begin{scope}[shift={(#1,#2)},scale=#3]
+    \draw[#4,line width=#3*1.0pt,line cap=round] (0,0.33)--(0,0.50);
+    \fill[#4] (0,0.55) circle (0.075);
+    \fill[#4,rounded corners=#3*0.7pt] (-0.51,-0.13) rectangle (-0.40,0.15);
+    \fill[#4,rounded corners=#3*0.7pt] (0.40,-0.13) rectangle (0.51,0.15);
+    \fill[#4,rounded corners=#3*3.4pt] (-0.41,-0.34) rectangle (0.41,0.34);
+    \fill[white] (-0.17,0.07) circle (0.098);
+    \fill[white] (0.17,0.07) circle (0.098);
+    \draw[white,line width=#3*1.1pt,line cap=round] (-0.13,-0.17)--(0.13,-0.17);
+  \end{scope}}
+\newcommand{\robot}[4]{%
+  \robotplain{#1}{#2}{#3}{#4}
+  \lockpath{#1+0.43*#3}{#2-0.27*#3}{0.40*#3}}
+\newcommand{\person}[4]{%
+  \begin{scope}[shift={(#1,#2)},scale=#3]
+    \fill[#4] (0,0.22) circle (0.215);
+    \fill[#4] (-0.43,-0.50) .. controls (-0.43,-0.02) and (0.43,-0.02) .. (0.43,-0.50) -- cycle;
+  \end{scope}}
+\newcommand{\envelope}[4]{%
+  \begin{scope}[shift={(#1,#2)},scale=#3]
+    \fill[#4,rounded corners=#3*1.3pt] (-0.5,-0.33) rectangle (0.5,0.33);
+    \draw[white,line width=#3*1.0pt,line join=round,line cap=round] (-0.43,0.26)--(0,-0.05)--(0.43,0.26);
+  \end{scope}}
+\newcommand{\shield}[4]{%
+  \begin{scope}[shift={(#1,#2)},scale=#3]
+    \fill[#4] (0,0.53) .. controls (0.16,0.43) and (0.30,0.39) .. (0.45,0.38)
+       -- (0.45,0.02) .. controls (0.45,-0.28) and (0.20,-0.45) .. (0,-0.55)
+       .. controls (-0.20,-0.45) and (-0.45,-0.28) .. (-0.45,0.02) -- (-0.45,0.38)
+       .. controls (-0.30,0.39) and (-0.16,0.43) .. (0,0.53) -- cycle;
+    \draw[white,line width=#3*1.5pt,line cap=round,line join=round] (-0.20,-0.02)--(-0.05,-0.18)--(0.22,0.14);
+  \end{scope}}
+\newcommand{\warntri}[4]{%
+  \begin{scope}[shift={(#1,#2)},scale=#3]
+    \fill[#4,rounded corners=#3*1.6pt] (0,0.52)--(0.55,-0.42)--(-0.55,-0.42)--cycle;
+    \draw[white,line width=#3*1.5pt,line cap=round] (0,0.20)--(0,-0.10);
+    \fill[white] (0,-0.26) circle (0.062);
+  \end{scope}}
+\newcommand{\funnel}[4]{%
+  \begin{scope}[shift={(#1,#2)},scale=#3]
+    \fill[#4,rounded corners=#3*0.8pt] (-0.5,0.42)--(0.5,0.42)--(0.11,-0.02)--(0.11,-0.48)--(-0.11,-0.34)--(-0.11,-0.02)--cycle;
+  \end{scope}}
+\newcommand{\crossmark}[4]{%
+  \begin{scope}[shift={(#1,#2)},scale=#3]
+    \draw[#4,line width=1.1pt,line cap=round] (-0.5,-0.5)--(0.5,0.5) (-0.5,0.5)--(0.5,-0.5);
+  \end{scope}}
+\newcommand{\bookpath}[3]{%
+  \begin{scope}[shift={(#1,#2)},scale=#3]
+    \fill[learnc!55!black,rounded corners=#3*0.6pt] (-0.56,-0.40)--(-0.56,0.26)--(0,0.14)--(0.56,0.26)--(0.56,-0.40)--(0,-0.50)--cycle;
+    \fill[learnc] (-0.03,-0.36) .. controls (-0.18,-0.25) and (-0.36,-0.23) .. (-0.50,-0.27)
+       -- (-0.50,0.34) .. controls (-0.36,0.38) and (-0.18,0.36) .. (-0.03,0.25) -- cycle;
+    \fill[learnc] (0.03,-0.36) .. controls (0.18,-0.25) and (0.36,-0.23) .. (0.50,-0.27)
+       -- (0.50,0.34) .. controls (0.36,0.38) and (0.18,0.36) .. (0.03,0.25) -- cycle;
+    \foreach \y in {0.16,-0.02}{%
+      \draw[white,line width=#3*1.2pt,line cap=round] (-0.40,\y+0.04)--(-0.13,\y);
+      \draw[white,line width=#3*1.2pt,line cap=round] (0.40,\y+0.04)--(0.13,\y);}
+  \end{scope}}
+\newcommand{\dial}[4]{%
+  \begin{scope}[shift={(#1,#2)},scale=#3]
+    \foreach \a in {150,110,70,30}{\draw[#4!70,line width=0.8pt,line cap=round] (\a:0.40)--(\a:0.52);}
+    \path[fill=white,draw=#4,line width=0.9pt] (0,0) circle (0.30);
+    \draw[#4,line width=1.3pt,line cap=round] (0,0)--(70:0.24);
+    \fill[#4] (0,0) circle (0.06);
+  \end{scope}}
+
+\newsavebox{\lockbox}\newsavebox{\bookbox}\newsavebox{\envFbox}\newsavebox{\envWbox}
+\sbox{\lockbox}{\tikz{\lockpath{0}{0}{0.26}}}
+\sbox{\bookbox}{\tikz{\bookpath{0}{0}{0.30}}}
+\sbox{\envFbox}{\tikz{\envelope{0}{0}{0.30}{colF}}}
+\sbox{\envWbox}{\tikz{\envelope{0}{0}{0.30}{colW}}}
+\newcommand{\frozen}{\raisebox{-0.22ex}{\usebox{\lockbox}}}
+\newcommand{\learned}{\raisebox{-0.20ex}{\usebox{\bookbox}}}
+\newcommand{\envF}{\raisebox{-0.05ex}{\usebox{\envFbox}}}
+\newcommand{\envW}{\raisebox{-0.05ex}{\usebox{\envWbox}}}
+
+\newcommand{\txt}[3]{\node[anchor=base west] at (#1,#2) {#3};}
+\newcommand{\ctxt}[3]{\node[anchor=base] at (#1,#2) {#3};}
+
+\tikzset{
+  oversightfig/.style={x=1cm,y=1cm,
+    every node/.style={inner sep=0pt,outer sep=0pt,font=\sffamily\fb,text=ink}},
+  panel/.style={rounded corners=5pt,line width=0.5pt},
+  card/.style={rounded corners=3pt,line width=0.6pt,fill=white},
+  flow/.style={-{Stealth[length=5.2pt,width=4.6pt]},line width=1.15pt,rounded corners=3pt},
+  hop/.style={-{Stealth[length=4.2pt,width=4pt]},line width=1.0pt},
+  unrev/.style={flow,warn,dash pattern=on 3.4pt off 2.2pt},
+  disp/.style={line width=0.55pt,linec,rounded corners=2pt},
+  fbk/.style={-{Stealth[length=4.2pt,width=3.6pt]},line width=0.8pt,learnc,dash pattern=on 0.9pt off 1.5pt,rounded corners=3pt},
+}
